@@ -2,7 +2,7 @@
 Author: cy 2449471714@qq.com
 Date: 2023-07-25 19:16:43
 LastEditors: cy 2449471714@qq.com
-LastEditTime: 2023-07-31 11:53:22
+LastEditTime: 2023-08-01 22:46:58
 FilePath: \read-nerf-pytorchd:\Code\summerLearn\nerf复现\nerf-cy\train_opts.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -13,7 +13,7 @@ def get_arg():
     parse.add_argument("--data",type=str,default='./data/nerf_synthetic/lego',help='训练数据目录')
     parse.add_argument("--data_type",type=str,default='synthesize',help='训练数据目录')
     parse.add_argument("--epoch",type=int,default=100000,help='训练步数')
-    parse.add_argument('--lr',type=float,default=8e-6,help='学习率')
+    parse.add_argument('--lr',type=float,default=1e-4,help='学习率')
     parse.add_argument('--pixel_num',type=int,default=1024,help='采样像素数目')
     parse.add_argument('--sample_num',type=int,default=64,help='在每条光线上均匀采样点的数目')
     

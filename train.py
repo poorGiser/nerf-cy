@@ -2,7 +2,7 @@
 Author: cy 2449471714@qq.com
 Date: 2023-07-25 19:37:01
 LastEditors: cy 2449471714@qq.com
-LastEditTime: 2023-07-31 11:34:49
+LastEditTime: 2023-08-01 23:02:32
 FilePath: \read-nerf-pytorchd:\Code\summerLearn\nerf复现\nerf-cy\train.py
 Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 '''
@@ -100,10 +100,10 @@ importance_sample_num = arguments.importance_sample_num
 if importance_sample_num > 0:
     nerf_fine = Nerf(net_depth,net_width,skip,3 * coord_L * 2 + 3,3 * dir_L * 2 + 3)#创建精细网络
     nerf_fine.to(device)
-    optimer = torch.optim.Adam(params=chain(nerf.parameters(),nerf_fine.parameters()), lr=lr, betas=(0.9, 0.999))
+    optimer = torch.optim.Adam(params=list(nerf.parameters())+list(nerf_fine.parameters()), lr=lr, betas=(0.9, 0.999))
 
 #TODO:恢复epoch
-epoch = 10000
+epoch = 1000
 for e in range(epoch):
     #随机选择一张图片
     img_index = torch.randint(0,train_num,size=(1,)).item()
@@ -176,7 +176,7 @@ for e in range(epoch):
             predict_fine_Y = nerf_fine(fine_X.reshape(-1,train_points.shape[-1]))
             predict_fine_Y = predict_fine_Y.reshape(batch_size,sample_num + importance_sample_num,-1)
             
-            rgb_map_fine,weights = volumn_render(predict_fine_Y,z_vals,sample_num + importance_sample_num,View)
+            rgb_map_fine,weights2 = volumn_render(predict_fine_Y,z_vals,sample_num + importance_sample_num,View)
             
             rgb_map_fine = torch.sigmoid(rgb_map_fine)
         #将rgb颜色值转换到0-1
@@ -194,7 +194,16 @@ for e in range(epoch):
         optimer.zero_grad()
         loss.backward()
         optimer.step()
+        
+
     print(f"train loss:epoch {e}:{loss.item()}")
+    # 学习率衰减
+    decay_rate = 0.1
+    decay_steps = epoch
+    new_lrate = lr * (decay_rate ** (e / decay_steps))
+    # print(new_lrate)
+    for param_group in optimer.param_groups:
+        param_group['lr'] = new_lrate
     
 #保存模型
 weights_path = arguments.weights_path
